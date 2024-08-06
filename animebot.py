@@ -344,6 +344,9 @@ def main():
     application.add_handler(CommandHandler("weeklytopanime", weekly_top_anime))
 
     scheduler = BackgroundScheduler()
+    async def async_check_reminders():
+        await check_reminders()
+    
     scheduler.add_job(asyncio.run(check_reminders), IntervalTrigger(minutes=1))
     scheduler.start()
 
