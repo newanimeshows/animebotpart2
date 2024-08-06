@@ -774,4 +774,4 @@ def main():
     application.run_polling()
 
 if __name__ == '__main__':
-    main(port=8080)
+    main()
