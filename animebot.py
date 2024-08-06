@@ -17,15 +17,6 @@ import os
 TOKEN = os.getenv('BOT_TOKEN')  # Replace with your actual token in env of koyeb/hiruko/etc
 
 
-#The Info Of Owner
-
-CHANNEL_LINK = 'https://t.me/your_channel'  # Replace with your channel's link
-GROUP_LINK = 'https://t.me/your_group'  # Replace with your group's link
-SOURCE_LINK = 'https://example.com/source'  # Replace with your source link
-OWNER_NAME = 'Your Name'  # Replace with your name
-OWNER_PROFILE_LINK = 'https://example.com/your-profile'  # Replace with a link to your profile or webpage
-
-
 # List of websites to search
 WEBSITES = [
     'https://graphql.anilist.co',
@@ -201,15 +192,12 @@ async def check_reminders():
     reminders = cursor.fetchall()
     conn.close()
     
-    bot = Bot(token=TOKEN)  # Initialize the bot object
-
     for user_id, anime_name in reminders:
         try:
             await bot.send_message(chat_id=user_id, text=f"Reminder: It's time to watch '{anime_name}'!")
         except Exception as e:
-            print(f"Error sending reminder to user {user_id}: {e}")
+            logger.error(f"Error sending reminder to user {user_id}: {e}")
 
-    # Remove reminders that have been sent
     conn = sqlite3.connect('favorites.db')
     cursor = conn.cursor()
     cursor.execute('DELETE FROM reminders WHERE remind_time <= ?', (now,))
@@ -771,10 +759,9 @@ def main():
     init_db()
     init_welcome_db()
     scheduler = BackgroundScheduler()
-    scheduler.add_job(scheduler_job, IntervalTrigger(minutes=1))
+    scheduler.add_job(check_reminders, scheduler_job, IntervalTrigger(minutes=1))
     scheduler.start()
-
-    scheduler = BackgroundScheduler()
+    
     async def scheduled_check_reminders():
         await check_reminders()
 
@@ -787,4 +774,4 @@ def main():
     application.run_polling()
 
 if __name__ == '__main__':
-    main()
+    app.run(port=8080)
